@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Lang Framework — Sections 2.3–2.6 Outline</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --color-bg: #ffffff;
+  --color-bg-secondary: #f7f7f5;
+  --color-text-primary: #1a1a1a;
+  --color-text-secondary: #555550;
+  --color-text-tertiary: #999992;
+  --color-border: rgba(0,0,0,0.12);
+  --color-border-secondary: rgba(0,0,0,0.22);
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --font: system-ui, -apple-system, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #1c1c1a;
+    --color-bg-secondary: #252523;
+    --color-text-primary: #e8e8e2;
+    --color-text-secondary: #a0a09a;
+    --color-text-tertiary: #666660;
+    --color-border: rgba(255,255,255,0.1);
+    --color-border-secondary: rgba(255,255,255,0.2);
+  }
+  .p-safe .p-badge { background: #0c3a5c; color: #85b7eb; }
+  .p-responsible .p-badge { background: #063525; color: #5dcaa5; }
+  .p-purposeful .p-badge { background: #2a2466; color: #afa9ec; }
+  .p-humancentred .p-badge { background: #3d2a06; color: #fac775; }
+  .ref-item { border-left-color: rgba(255,255,255,0.2); }
+}
+body {
+  font-family: var(--font);
+  background: var(--color-bg);
+  color: var(--color-text-primary);
+  line-height: 1.6;
+  padding: 2rem 1rem;
+  max-width: 860px;
+  margin: 0 auto;
+}
+.page-header { padding-bottom: 1.25rem; border-bottom: 0.5px solid var(--color-border); margin-bottom: 1.25rem; }
+.page-header h1 { font-size: 18px; font-weight: 500; color: var(--color-text-primary); }
+.page-header p { font-size: 13px; color: var(--color-text-secondary); margin-top: 5px; line-height: 1.5; }
+.legend { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+.legend-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--color-text-secondary); }
+.legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.expand-all {
+  font-size: 12px; color: var(--color-text-secondary);
+  background: none; border: 0.5px solid var(--color-border-secondary);
+  border-radius: var(--radius-md); padding: 5px 12px; cursor: pointer;
+  margin-bottom: 1rem; font-family: var(--font);
+}
+.expand-all:hover { background: var(--color-bg-secondary); }
+.principle { margin-bottom: 1rem; border: 0.5px solid var(--color-border); border-radius: var(--radius-lg); overflow: hidden; }
+.principle-header { display: flex; align-items: center; gap: 10px; padding: 12px 14px; cursor: pointer; user-select: none; }
+.principle-header:hover { background: var(--color-bg-secondary); }
+.p-badge { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; font-size: 11px; font-weight: 500; flex-shrink: 0; }
+.p-safe .p-badge { background: #E6F1FB; color: #0C447C; }
+.p-responsible .p-badge { background: #E1F5EE; color: #085041; }
+.p-purposeful .p-badge { background: #EEEDFE; color: #3C3489; }
+.p-humancentred .p-badge { background: #FAEEDA; color: #633806; }
+.p-safe .principle-header { border-left: 3px solid #185FA5; }
+.p-responsible .principle-header { border-left: 3px solid #0F6E56; }
+.p-purposeful .principle-header { border-left: 3px solid #534AB7; }
+.p-humancentred .principle-header { border-left: 3px solid #BA7517; }
+.p-title { font-size: 15px; font-weight: 500; color: var(--color-text-primary); flex: 1; }
+.p-subtitle { font-size: 12px; color: var(--color-text-secondary); }
+.p-chevron { font-size: 13px; color: var(--color-text-tertiary); transition: transform 0.2s; margin-left: auto; }
+.p-chevron.open { transform: rotate(90deg); }
+.p-body { display: none; border-top: 0.5px solid var(--color-border); }
+.p-body.open { display: block; }
+.p-question { font-size: 12px; font-style: italic; color: var(--color-text-secondary); padding: 10px 14px 8px; background: var(--color-bg-secondary); border-bottom: 0.5px solid var(--color-border); }
+.guideline { border-bottom: 0.5px solid var(--color-border); }
+.guideline:last-child { border-bottom: none; }
+.guideline-header { display: flex; align-items: center; gap: 8px; padding: 10px 14px 10px 20px; cursor: pointer; user-select: none; }
+.guideline-header:hover { background: var(--color-bg-secondary); }
+.g-number { font-size: 11px; font-weight: 500; color: var(--color-text-tertiary); min-width: 18px; }
+.g-title { font-size: 13px; font-weight: 500; color: var(--color-text-primary); flex: 1; }
+.g-chevron { font-size: 12px; color: var(--color-text-tertiary); transition: transform 0.2s; }
+.g-chevron.open { transform: rotate(90deg); }
+.g-body { display: none; padding: 0 14px 12px 38px; }
+.g-body.open { display: block; }
+.comp-item { display: flex; flex-direction: column; margin: 10px 0 0; border: 0.5px solid var(--color-border); border-radius: var(--radius-md); overflow: hidden; }
+.comp-header { display: flex; align-items: flex-start; gap: 6px; padding: 8px 10px; cursor: pointer; background: var(--color-bg); }
+.comp-header:hover { background: var(--color-bg-secondary); }
+.comp-num { font-size: 11px; font-weight: 500; color: var(--color-text-tertiary); min-width: 16px; padding-top: 2px; }
+.comp-text { font-size: 12px; color: var(--color-text-primary); line-height: 1.5; flex: 1; }
+.comp-chevron { font-size: 11px; color: var(--color-text-tertiary); transition: transform 0.2s; flex-shrink: 0; padding-top: 3px; }
+.comp-chevron.open { transform: rotate(90deg); }
+.reflections { display: none; padding: 6px 8px 8px 24px; background: var(--color-bg-secondary); border-top: 0.5px solid var(--color-border); }
+.reflections.open { display: block; }
+.ref-label { font-size: 10px; font-weight: 500; color: var(--color-text-tertiary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
+.ref-item { font-size: 12px; color: var(--color-text-secondary); font-style: italic; line-height: 1.5; margin-bottom: 4px; padding-left: 10px; border-left: 2px solid var(--color-border-secondary); }
+.footer { margin-top: 2rem; padding-top: 1rem; border-top: 0.5px solid var(--color-border); font-size: 11px; color: var(--color-text-tertiary); }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>Framework for the Ethical Use of AI in Language Education — Sections 2.3–2.6</h1>
+  <p>Collapsible four-level outline: Principle → Guideline → Competence → Reflection prompt<br>Source: Kostoulas et al. (2026). <em>Framework for the Use of AI in Language Education.</em> ECML, Graz.</p>
+  <div class="legend">
+    <span class="legend-item"><span class="legend-dot" style="background:#185FA5"></span>Safe</span>
+    <span class="legend-item"><span class="legend-dot" style="background:#0F6E56"></span>Responsible</span>
+    <span class="legend-item"><span class="legend-dot" style="background:#534AB7"></span>Purposeful</span>
+    <span class="legend-item"><span class="legend-dot" style="background:#BA7517"></span>Human-centred</span>
+  </div>
+</div>
+
+<button class="expand-all" id="toggleAll" onclick="toggleAll()">Expand all</button>
+<div id="outline"></div>
+
+<div class="footer">AI Lang project · European Centre for Modern Languages · CC-BY-SA</div>
+
+<script>
+const data = [
+  {
+    id: "safe", label: "2.3", title: "Safe use of AI", section: "2.3",
+    question: "Are our uses of artificial intelligence in language education legally compliant, transparent, and risk-free?",
+    guidelines: [
+      {
+        num: "G1", title: "Comply with existing legal requirements and institutional standards",
+        competences: [
+          { num: "1", text: "How fully do the AI tools I use align with local, national, and institutional legal frameworks?", reflections: ["Where can I verify that a tool meets legal or institutional standards?", "Do I check and summarise the main points of a tool's terms before students use it?", "How do I ensure learners (or guardians) understand what they agree to?", "What steps do I take to prevent exposure to illegal or harmful content?"] },
+          { num: "2", text: "How carefully does the content I (co)generate with AI adhere to intellectual property laws?", reflections: ["How do I attribute adapted or AI-generated materials? Would my attribution practices hold up if questioned by a colleague, a learner, or a rights-holder?", "How do I safeguard learners' creative work from being reused without consent?", "How am I modelling the intellectual property practices I expect from my learners when they use AI?"] },
+          { num: "3", text: "How do I maintain responsibility as a teacher when delegating tasks to AI applications?", reflections: ["When AI generates feedback, grades, or learning materials, what does my review process look like before that output reaches learners?", "How would I explain my AI-related decisions to learners or colleagues?", "How do I provide space for learners to challenge AI-generated output?"] }
+        ]
+      },
+      {
+        num: "G2", title: "Safeguard the data security and digital safety of all participants",
+        competences: [
+          { num: "4", text: "How confidently can I identify what types of data (e.g., voice recordings, writing samples, metadata) are collected when using AI applications in language education?", reflections: ["What routines do I have (or can I put in place) for checking whether AI tools require learners to sign in, and (if so) what data they collect?", "How do I decide whether data collection by AI applications is pedagogically needed and proportionate for language learning purposes?", "What procedures do I have (or can I put in place) for deleting user data or preventing it from being used for purposes beyond the classroom?"] },
+          { num: "5", text: "How successfully can I raise awareness of learners, colleagues and parents about risks to data privacy?", reflections: ["How might I explain data privacy risks to learners or colleagues in accessible and practical terms?", "How might I involve learners in reviewing the privacy settings of a tool we use together?", "What should I discuss with my class or team about the implications of learner profiling?"] },
+          { num: "6", text: "How effectively can I protect vulnerable learners from the misuse of data gathered, stored and mined by AI applications?", reflections: ["Are there learners in my classroom whose personal data could put them at greater risk if mishandled? What makes them especially vulnerable?", "How do I help vulnerable learners themselves understand and manage the data risks they face, without alarming or overwhelming them?", "How might I adapt the use of AI tools to protect these learners' rights and identities?"] }
+        ]
+      }
+    ]
+  },
+  {
+    id: "responsible", label: "2.4", title: "Responsible use of AI", section: "2.4",
+    question: "Does our use of AI position our teaching as a force for positive change?",
+    guidelines: [
+      {
+        num: "G3", title: "Promote social justice, linguistic and cultural diversity",
+        competences: [
+          { num: "7", text: "How effectively does my use of AI sustain or promote linguistic diversity?", reflections: ["Which languages and varieties are represented in the AI tools I use, and which are absent or poorly served?", "How do I ensure that feedback or resources reflect multiple linguistic varieties and registers?", "When I use AI for accuracy-focused feedback, do I specify which language variety or register is the target, and do I share that information transparently with learners?", "Is the AI output I use reproducing the same linguistic hierarchies I would challenge in a conventional textbook?", "How might instances of linguistic bias in AI output be treated as pedagogical opportunities?"] },
+          { num: "8", text: "How vigilantly do I ensure that AI output in my class does not reproduce biases towards certain knowledge, voices and values?", reflections: ["Whose perspectives or interests are represented in the data that my AI tools rely on?", "What prompting strategies might I use to actively generate an inclusive range of perspectives, knowledge systems or cultural framings?", "What is my process for reviewing AI-generated content for bias before it reaches learners?", "How do I create space for learners to bring their own knowledge and cultural perspectives into dialogue with AI output?"] },
+          { num: "9", text: "How do I make sure that the AI tasks I design are accessible to all learners?", reflections: ["What disparities in access to AI tools am I aware of in my context?", "How can I adapt my teaching to accommodate learners with limited access or skills?", "What resources or partnerships can I use to bridge these gaps?"] }
+        ]
+      },
+      {
+        num: "G4", title: "Foster environmental sustainability",
+        competences: [
+          { num: "10", text: "How well am I informed about the environmental consequences of AI use in language education?", reflections: ["How do the tools I use affect people and ecosystems beyond my classroom?", "What invisible costs (energy, data, labour) accompany apparently simple digital actions in my teaching practice?"] },
+          { num: "11", text: "To what extent can I minimise the environmental impact of my AI use?", reflections: ["When planning lessons, do I consider whether a low-impact or analogue alternative could achieve the same goal?", "How do I plan, refine, and evaluate my prompts to maximise efficiency in AI use?"] },
+          { num: "12", text: "How effectively do I teach and model environmentally sustainable uses of AI?", reflections: ["How do I share examples of environmentally or socially responsible practice with colleagues?", "What institutional policies or collaborations could reduce the environmental and social footprint of AI in education?"] }
+        ]
+      }
+    ]
+  },
+  {
+    id: "purposeful", label: "2.5", title: "Purposeful use of AI", section: "2.5",
+    question: "How does AI add genuine pedagogical value and improve the quality of teaching and learning?",
+    guidelines: [
+      {
+        num: "G5", title: "Enhance theory- and policy-informed language pedagogy",
+        competences: [
+          { num: "13", text: "How consistently do my AI-assisted practice opportunities foreground meaning-making and authentic language use?", reflections: ["When I use conversational agents or AI-generated tasks for communicative practice, am I clear about what communicative goals I want learners to achieve?", "When AI interaction prioritises formal accuracy over meaningful communication, how do I notice this, and what do I do about it?", "How do I compare the quality of communicative engagement in AI-supported activities with that in teacher-led or peer interaction tasks?"] },
+          { num: "14", text: "To what extent do the tasks I design with AI support have clear learning goals, defined communicative outcomes and transparent evaluation criteria?", reflections: ["How do I ensure that the outcomes of AI-supported communicative tasks are defined broadly enough to allow for genuine language use, rather than channelling learners toward a single expected response?", "When designing AI-supported tasks, can I co-create prompts with learners to draw on their interests, experiences and linguistic repertoires?", "When an AI-supported communicative task does not produce the learning outcomes I intended, what does my process for reviewing and revising the task look like?"] },
+          { num: "15", text: "How successfully can I use AI tools to personalize learning?", reflections: ["Which elements of my teaching (e.g., goals, content, tasks, feedback) am I currently differentiating with AI?", "How might I use speech-to-text, text-to-speech or other assistive AI functions to support learners with specific needs without singling them out?", "How do I evaluate whether AI-assisted differentiation is actually improving learning outcomes for the learners it is intended to support, rather than simply generating more varied materials?"] },
+          { num: "16", text: "How transparent and effective is the way I integrate AI into feedback processes?", reflections: ["When I use AI to generate feedback for learners, how do I communicate to them that AI has been involved?", "When AI feedback and my own professional judgment diverge, how do I handle that divergence transparently with learners?", "How do I know whether AI-assisted feedback is actually improving learner performance and self-regulation over time, rather than simply providing more feedback more quickly?"] }
+        ]
+      },
+      {
+        num: "G6", title: "Create expanded language learning opportunities",
+        competences: [
+          { num: "17", text: "To what extent do the AI-assisted tasks I design transform the language learning experience?", reflections: ["What is one example of a learning opportunity you created using AI that would otherwise not be feasible in your classroom or learning context? In what ways have students benefited from this?", "What would be lost if I removed AI from a task entirely?", "How do the AI-supported activities I use complement meaning-focused work? What pedagogical purposes do they serve beyond efficiency?", "What are the learning outcomes that my AI-supported activities serve, and how well do they align with my instructional goals?"] },
+          { num: "18", text: "To what extent do the AI-assisted tasks I design increase learner agency?", reflections: ["Do the AI tools I use open up choices for learners, or do they channel them through pre-structured pathways?", "How much control do learners have over their goals, process and outcomes?", "How might the AI tools I use affect learners' sense of ownership over their language learning?"] },
+          { num: "19", text: "To what extent do the AI-assisted tasks I design improve my teacher capacity?", reflections: ["How am I using the time that is saved by delegating aspects of my work to artificial intelligence?", "In what ways might AI help me notice things about my learners or my practice that I would otherwise have missed?", "Which of the AI tools I use are helping me do new things as a language teacher, and which ones are helping me do the same things more efficiently?"] }
+        ]
+      }
+    ]
+  },
+  {
+    id: "humancentred", label: "2.6", title: "Human-centred use of AI", section: "2.6",
+    question: "How can teachers and learners use AI reflectively and maintain professional agency?",
+    guidelines: [
+      {
+        num: "G7", title: "Prepare learners for critical, healthy engagement with AI",
+        competences: [
+          { num: "20", text: "How well do I integrate language practice and AI literacy development in my teaching practice?", reflections: ["Which critical literacy practices in my current teaching can I readily transfer to the evaluation of AI-generated texts?", "How do I help learners critique AI-generated content, and what language learning opportunities does this create?", "What can I do to integrate AI literacy work in meaningful language learning activity rather than treat it as a separate technical skill?", "How might effective prompting be taught as a language learning activity (e.g., by connecting to existing work on register, genre, and communicative purpose)?"] },
+          { num: "21", text: "How effectively do I preserve learner well-being in an AI-assisted environment?", reflections: ["What signs of fatigue, disengagement, or over-reliance on AI do I look for during AI-supported activities? How do I respond when I notice them?", "How do I adapt AI-supported tasks to accommodate learners with different cognitive strengths, learning differences, or levels of digital confidence?", "What can I do to encourage learners to reflect on their own experience of AI-assisted learning, its effect on their wellbeing and possible over-dependence?"] },
+          { num: "22", text: "How well do the AI-assisted tasks that I design affirm learner identity?", reflections: ["What are my teaching options, when AI-supported tasks appear to be producing uniform or formulaic output that overrides learner voice?", "In what ways do I invite learners to draw on their own experiences and perspectives to compare, contest, or personalise AI-generated content?", "What procedures do I have in place to help learners notice their authorial choice, tone, stance, and personal expression and compare them to AI output?"] }
+        ]
+      },
+      {
+        num: "G8", title: "Empower language teachers as reflective professionals",
+        competences: [
+          { num: "23", text: "How rigorously do I use AI to reflect on my teaching practices?", reflections: ["How often do I use AI tools to revisit a lesson or activity?", "When I ask an AI tool to comment on my teaching, what aspects of contextual detail do I provide for its feedback to be genuinely useful?", "How well do the patterns an AI tool identifies in my practice align with my own professional interpretations?", "How might I systematically record AI-assisted reflections over time to track the development of my thinking?"] },
+          { num: "24", text: "How critically do I use AI to systematically explore aspects of my teaching practice?", reflections: ["How do I identify which aspects of my teaching are worth investigating?", "Which aspects of classroom-based inquiry can be handled well by artificial intelligence and which require more human engagement?", "Do I use AI tools to surface assumptions in my lesson plans or materials that I might not have noticed myself, or do I mainly use them to confirm decisions I have already made?"] },
+          { num: "25", text: "How deeply can I reflect on the values implicit in my use of artificial intelligence?", reflections: ["Thinking about the AI-supported activities I use most frequently, what do they collectively suggest about my teaching beliefs?", "How would I explain the values embedded in my AI use to a learner, a parent, or a policymaker?"] }
+        ]
+      }
+    ]
+  }
+];
+
+const icons = {
+  safe: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L4 6v6c0 5.25 3.5 10.15 8 11.5C16.5 22.15 20 17.25 20 12V6L12 2z"/><polyline points="9 12 11 14 15 10"/></svg>`,
+  responsible: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.5-2 9-6.5 9-11V5l-9-3-9 3v6c0 4.5 3.5 9 9 11z"/><path d="M8 12c1-1.5 2.5-2 4-2s3 .5 4 2"/><circle cx="10" cy="9" r="1" fill="currentColor" stroke="none"/><circle cx="14" cy="9" r="1" fill="currentColor" stroke="none"/></svg>`,
+  purposeful: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/></svg>`,
+  humancentred: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>`
+};
+
+function buildOutline() {
+  const container = document.getElementById("outline");
+  data.forEach(principle => {
+    const pDiv = document.createElement("div");
+    pDiv.className = `principle p-${principle.id}`;
+
+    const pH = document.createElement("div");
+    pH.className = "principle-header";
+    pH.innerHTML = `<div class="p-badge">${icons[principle.id]}</div><div style="flex:1"><div class="p-title">${principle.title}</div><div class="p-subtitle">${principle.guidelines.length} guidelines · ${principle.guidelines.reduce((a,g)=>a+g.competences.length,0)} competences</div></div><span class="p-chevron" id="pc-${principle.id}">▶</span>`;
+    pH.onclick = () => togglePrinciple(principle.id);
+
+    const pBody = document.createElement("div");
+    pBody.className = "p-body";
+    pBody.id = `pb-${principle.id}`;
+
+    const pq = document.createElement("div");
+    pq.className = "p-question";
+    pq.textContent = `"${principle.question}"`;
+    pBody.appendChild(pq);
+
+    principle.guidelines.forEach(g => {
+      const gDiv = document.createElement("div");
+      gDiv.className = "guideline";
+
+      const gH = document.createElement("div");
+      gH.className = "guideline-header";
+      gH.innerHTML = `<span class="g-number">${g.num}</span><span class="g-title">${g.title}</span><span class="g-chevron" id="gc-${principle.id}-${g.num}">▶</span>`;
+      gH.onclick = () => toggleGuideline(principle.id, g.num);
+
+      const gBody = document.createElement("div");
+      gBody.className = "g-body";
+      gBody.id = `gb-${principle.id}-${g.num}`;
+
+      g.competences.forEach(c => {
+        const cItem = document.createElement("div");
+        cItem.className = "comp-item";
+
+        const cH = document.createElement("div");
+        cH.className = "comp-header";
+        const hasRef = c.reflections.length > 0;
+        cH.innerHTML = `<span class="comp-num">${c.num}.</span><span class="comp-text">${c.text}</span>${hasRef ? `<span class="comp-chevron" id="cc-${principle.id}-${g.num}-${c.num}">▶</span>` : ""}`;
+        if (hasRef) cH.onclick = () => toggleComp(principle.id, g.num, c.num);
+        else cH.style.cursor = "default";
+
+        cItem.appendChild(cH);
+
+        if (hasRef) {
+          const refs = document.createElement("div");
+          refs.className = "reflections";
+          refs.id = `cr-${principle.id}-${g.num}-${c.num}`;
+          refs.innerHTML = `<div class="ref-label">Reflection prompts</div>` + c.reflections.map(r => `<div class="ref-item">${r}</div>`).join("");
+          cItem.appendChild(refs);
+        }
+
+        gBody.appendChild(cItem);
+      });
+
+      gDiv.appendChild(gH);
+      gDiv.appendChild(gBody);
+      pBody.appendChild(gDiv);
+    });
+
+    pDiv.appendChild(pH);
+    pDiv.appendChild(pBody);
+    container.appendChild(pDiv);
+  });
+}
+
+function togglePrinciple(id) {
+  const body = document.getElementById(`pb-${id}`);
+  const chev = document.getElementById(`pc-${id}`);
+  const open = body.classList.toggle("open");
+  chev.classList.toggle("open", open);
+}
+function toggleGuideline(pid, gnum) {
+  const body = document.getElementById(`gb-${pid}-${gnum}`);
+  const chev = document.getElementById(`gc-${pid}-${gnum}`);
+  const open = body.classList.toggle("open");
+  chev.classList.toggle("open", open);
+}
+function toggleComp(pid, gnum, cnum) {
+  const refs = document.getElementById(`cr-${pid}-${gnum}-${cnum}`);
+  const chev = document.getElementById(`cc-${pid}-${gnum}-${cnum}`);
+  const open = refs.classList.toggle("open");
+  chev.classList.toggle("open", open);
+}
+
+let allOpen = false;
+function toggleAll() {
+  allOpen = !allOpen;
+  document.getElementById("toggleAll").textContent = allOpen ? "Collapse all" : "Expand all";
+  document.querySelectorAll(".p-body").forEach(el => el.classList.toggle("open", allOpen));
+  document.querySelectorAll(".p-chevron").forEach(el => el.classList.toggle("open", allOpen));
+  document.querySelectorAll(".g-body").forEach(el => el.classList.toggle("open", allOpen));
+  document.querySelectorAll(".g-chevron").forEach(el => el.classList.toggle("open", allOpen));
+  if (!allOpen) {
+    document.querySelectorAll(".reflections").forEach(el => el.classList.remove("open"));
+    document.querySelectorAll(".comp-chevron").forEach(el => el.classList.remove("open"));
+  }
+}
+
+buildOutline();
+</script>
+</body>
+</html>
