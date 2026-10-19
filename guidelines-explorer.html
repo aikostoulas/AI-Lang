@@ -156,7 +156,8 @@ details.more ol{margin:10px 0 0;padding-left:1.4em;display:flex;flex-direction:c
       <li><button type="button" data-go="1">Start</button></li>
       <li><button type="button" data-go="2">1 Orient</button></li>
       <li><button type="button" data-go="3">2 Engage</button></li>
-      <li><button type="button" data-go="4">3–4 Try and prepare</button></li>
+      <li><button type="button" data-go="4">3 Try</button></li>
+      <li><button type="button" data-go="5">4 Prepare</button></li>
     </ol></nav>
   </div>
 </header>
@@ -257,18 +258,17 @@ details.more ol{margin:10px 0 0;padding-left:1.4em;display:flex;flex-direction:c
         <textarea id="helpWhy" data-bind="helpWhy" rows="2" placeholder="Why was it helpful?"></textarea>
       </div>
     </div>
-    <div class="navrow"><button class="btn" type="button" data-go="2">← Back</button><button class="btn primary" type="button" data-go="4">Next: Try and prepare →</button></div>
+    <div class="navrow"><button class="btn" type="button" data-go="2">← Back</button><button class="btn primary" type="button" data-go="4">Next: Try →</button></div>
   </section>
 
   <!-- PAGE 4 -->
   <section class="page" id="p4" hidden aria-labelledby="h4t">
     <div class="stack">
-      <p class="eyebrow">Steps 3 and 4 of 4 · Try and prepare</p>
+      <p class="eyebrow">Step 3 of 4 · Try</p>
       <span class="chip" id="g4-chip"></span>
-      <h1 id="h4t">Try it, then prepare for the plenary</h1>
+      <h1 id="h4t">Try it with a chatbot</h1>
     </div>
     <div class="panel">
-      <h2>Try it with a chatbot</h2>
       <p>Test one point from your guideline with a general-purpose chatbot. Here is a suggestion for your guideline. You can also test something else you noticed.</p>
       <div class="probe"><span class="eyebrow" id="probe-label"></span><p id="probe-text"></p></div>
       <p class="hint">Do not enter personal data about real learners or colleagues.</p>
@@ -277,9 +277,18 @@ details.more ol{margin:10px 0 0;padding-left:1.4em;display:flex;flex-direction:c
       <div class="field"><label class="lab" for="prompt">What we asked</label><textarea id="prompt" data-bind="prompt" rows="3" placeholder="Paste or type your prompt"></textarea></div>
       <div class="field"><label class="lab" for="notice">What did we notice?</label><textarea id="notice" data-bind="notice" rows="3" placeholder="What it did well, what it got wrong, what surprised you…"></textarea></div>
     </div>
+    <div class="navrow"><button class="btn" type="button" data-go="3">← Back</button><button class="btn primary" type="button" data-go="5">Next: Prepare →</button></div>
+  </section>
+
+  <!-- PAGE 5 -->
+  <section class="page" id="p5" hidden aria-labelledby="h5t">
+    <div class="stack">
+      <p class="eyebrow">Step 4 of 4 · Prepare</p>
+      <span class="chip" id="g5-chip"></span>
+      <h1 id="h5t">Prepare for the plenary</h1>
+    </div>
     <div class="panel">
-      <h2>Prepare for the plenary</h2>
-      <p>Write one note each for the board. Your marked questions from the previous page are shown as a reminder.</p>
+      <p>Write one note each for the board. The questions you marked in Engage are shown as a reminder.</p>
       <div class="reminder"><span class="h"><b>Hardest:</b> <span id="rem-hard"></span></span><span class="p"><b>Most helpful:</b> <span id="rem-help"></span></span></div>
       <div class="field"><label class="lab" for="prepHard">Something we found hard</label><input type="text" id="prepHard" data-bind="prepHard" placeholder="Short enough for a sticky note"></div>
       <div class="field"><label class="lab" for="prepHelp">Something we found helpful</label><input type="text" id="prepHelp" data-bind="prepHelp" placeholder="Short enough for a sticky note"></div>
@@ -290,7 +299,7 @@ details.more ol{margin:10px 0 0;padding-left:1.4em;display:flex;flex-direction:c
       <p>Download your work before you close this page.</p>
       <div class="row"><button class="btn primary" type="button" data-act="word">Download Word document</button><button class="btn" type="button" data-act="save">Save progress (.json)</button></div>
     </div>
-    <div class="navrow"><button class="btn" type="button" data-go="3">← Back</button></div>
+    <div class="navrow"><button class="btn" type="button" data-go="4">← Back</button></div>
   </section>
 </main>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
@@ -417,7 +426,7 @@ function renderMarks(){
 function setPick(id,q){ const e=$(id); e.textContent=q?q.text:"Not chosen yet"; e.classList.toggle("empty",!q); }
 function renderP4(){
   const d=G(); if(!d) return;
-  chip("g4-chip");
+  chip("g4-chip"); chip("g5-chip");
   $("probe-label").textContent="Suggestion for Guideline "+d.id;
   $("probe-text").textContent=d.probe;
   renderMarks();
@@ -438,7 +447,7 @@ function renderAll(){
 function go(n, quiet){
   if (n>1 && !S.g) n=1;
   page=n;
-  for (let i=1;i<=4;i++) $("p"+i).hidden=(i!==n);
+  for (let i=1;i<=5;i++) $("p"+i).hidden=(i!==n);
   document.querySelectorAll("#steps button").forEach(b=>{ const t=Number(b.dataset.go); b.disabled=(t>1&&!S.g); if(t===n) b.setAttribute("aria-current","step"); else b.removeAttribute("aria-current"); });
   if (!quiet) window.scrollTo(0,0);
 }
