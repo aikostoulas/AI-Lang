@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AI Lang Guidelines Explorer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Public+Sans:wght@400;500;600;700&display=swap">
+<style>
+body{margin:0}[hidden]{display:none!important}img{max-width:100%}
+/* Layout: one worksheet column under a sticky step rail; guideline text set like a reading page, controls set like a form. */
+:root{
+  --bg:#f3f4f1; --surface:#ffffff; --sunk:#eceee9; --ink:#1b2330; --muted:#5a6472; --line:#d6dad3;
+  --accent:#2c4d8a; --accent-ink:#ffffff; --accent-soft:#e2e8f4;
+  --hard:#a9512a; --hard-soft:#f6e6dc; --help:#2c7350; --help-soft:#dff0e6;
+  --p1:#2c4d8a; --p2:#2c7350; --p3:#9a6a12; --p4:#7b3f75;
+  --warn-soft:#fbf1d6; --warn-ink:#6b4d00;
+  --f-read:"Newsreader", Georgia, "Times New Roman", serif;
+  --f-ui:"Public Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#151a21; --surface:#1d242d; --sunk:#232b35; --ink:#e7eaee; --muted:#a3acb8; --line:#333d49;
+  --accent:#8fb0ec; --accent-ink:#10192b; --accent-soft:#25324a;
+  --hard:#ec9a73; --hard-soft:#3d2a20; --help:#7fcfa2; --help-soft:#1f3a2c;
+  --p1:#8fb0ec; --p2:#7fcfa2; --p3:#e2b65c; --p4:#d39ccc;
+  --warn-soft:#3a3220; --warn-ink:#f0d48a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#151a21; --surface:#1d242d; --sunk:#232b35; --ink:#e7eaee; --muted:#a3acb8; --line:#333d49;
+  --accent:#8fb0ec; --accent-ink:#10192b; --accent-soft:#25324a;
+  --hard:#ec9a73; --hard-soft:#3d2a20; --help:#7fcfa2; --help-soft:#1f3a2c;
+  --p1:#8fb0ec; --p2:#7fcfa2; --p3:#e2b65c; --p4:#d39ccc;
+  --warn-soft:#3a3220; --warn-ink:#f0d48a; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-ui);font-size:15px;line-height:1.55}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+.wrap{max-width:780px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:1px solid var(--line)}
+.top .wrap{padding-block:12px 10px;display:flex;flex-direction:column;gap:10px}
+.brandrow{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px}
+.brand{font-family:var(--f-read);font-size:1.2rem;font-weight:600;letter-spacing:-.005em;margin:0}
+.brand small{display:block;font-family:var(--f-ui);font-size:.72rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.tools{display:flex;flex-wrap:wrap;gap:6px}
+.steps{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;margin:0;padding:0;list-style:none}
+.steps::-webkit-scrollbar{display:none}
+.steps button{all:unset;cursor:pointer;white-space:nowrap;font-size:.84rem;font-weight:600;color:var(--muted);padding:6px 12px;border-radius:999px;border:1px solid transparent}
+.steps button:hover:not([disabled]){color:var(--ink);background:var(--sunk)}
+.steps button[aria-current="step"]{color:var(--accent-ink);background:var(--accent)}
+.steps button[disabled]{opacity:.45;cursor:not-allowed}
+.steps button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.banner{font-size:.82rem;color:var(--muted);padding-block:8px 0}
+.banner b{color:var(--ink);font-weight:600}
+main{padding-block:20px 64px;display:flex;flex-direction:column;gap:18px}
+section.page{display:flex;flex-direction:column;gap:22px}
+.eyebrow{font-size:.74rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin:0}
+h1,h2,h3{font-family:var(--f-read);font-weight:600;text-wrap:balance;margin:0;letter-spacing:-.01em}
+h1{font-size:2rem;line-height:1.15}
+h2{font-size:1.5rem;line-height:1.2}
+h3{font-size:1.15rem;line-height:1.3}
+p{margin:0}
+.lede{font-size:1rem;color:var(--ink);max-width:65ch}
+.stack{display:flex;flex-direction:column;gap:10px}
+.prose{font-family:var(--f-read);font-size:1.1rem;line-height:1.7;max-width:65ch;display:flex;flex-direction:column;gap:1em}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px;display:flex;flex-direction:column;gap:12px}
+.note{background:var(--sunk);border-radius:var(--r);padding:12px 14px;font-size:.9rem;display:flex;flex-direction:column;gap:6px}
+.note.warn{background:var(--warn-soft);color:var(--warn-ink)}
+ol.path{margin:0;padding:0;list-style:none;display:grid;gap:10px;counter-reset:s}
+ol.path li{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:baseline}
+ol.path li::before{counter-increment:s;content:counter(s);font-family:var(--f-read);font-weight:600;font-size:1.05rem;color:var(--accent);width:1.6rem;height:1.6rem;border-radius:50%;border:1.5px solid var(--accent);display:inline-grid;place-items:center;font-variant-numeric:tabular-nums}
+label.lab,.lab{font-weight:600;font-size:.92rem;display:block}
+.hint{font-size:.82rem;color:var(--muted)}
+input[type=text],textarea,select{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:9px 11px;width:100%;min-width:0}
+textarea{resize:vertical;min-height:4.2em;line-height:1.5}
+input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
+.btn{font:inherit;font-weight:600;font-size:.88rem;cursor:pointer;border-radius:8px;padding:8px 14px;border:1px solid var(--line);background:var(--surface);color:var(--ink);display:inline-flex;align-items:center;gap:6px}
+.btn:hover:not([disabled]){background:var(--sunk)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.primary:hover:not([disabled]){filter:brightness(1.08);background:var(--accent)}
+.btn.small{font-size:.8rem;padding:6px 10px}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.navrow{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;padding-top:6px}
+.names{display:flex;flex-direction:column;gap:8px}
+.namerow{display:flex;gap:8px;align-items:center}
+.namerow input{flex:1}
+.iconbtn{font:inherit;cursor:pointer;width:38px;height:38px;flex:none;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--muted);font-size:1.1rem;line-height:1}
+.iconbtn:hover{color:var(--ink);background:var(--sunk)}
+.iconbtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:.76rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--pc,var(--accent))}
+.chip::before{content:"";width:9px;height:9px;border-radius:2px;background:var(--pc,var(--accent))}
+.gq{font-family:var(--f-read);font-style:italic;color:var(--muted);font-size:1.02rem;max-width:65ch}
+.confirm{border:1px solid var(--hard);background:var(--hard-soft);border-radius:var(--r);padding:12px 14px;display:flex;flex-direction:column;gap:10px}
+.confirm .row{display:flex;flex-wrap:wrap;gap:8px}
+details.comp{background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+details.comp>summary{list-style:none;cursor:pointer;padding:14px 16px;display:grid;grid-template-columns:auto 1fr auto;gap:4px 12px;align-items:start}
+details.comp>summary::-webkit-details-marker{display:none}
+details.comp>summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:var(--r)}
+.cnum{font-family:var(--f-read);font-weight:600;font-size:1.25rem;color:var(--accent);font-variant-numeric:tabular-nums;min-width:1.6rem}
+.ccan{font-weight:600;font-size:.98rem;min-width:0}
+.cdesc{grid-column:2;font-family:var(--f-read);font-style:italic;color:var(--muted);font-size:1rem;min-width:0}
+.cside{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.badge{font-size:.74rem;font-weight:600;color:var(--muted);background:var(--sunk);border-radius:999px;padding:2px 9px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.chev{width:10px;height:10px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg);transition:transform .15s;margin:4px 6px 0 0}
+details[open] .chev{transform:rotate(-135deg);margin-top:8px}
+.qs{border-top:1px solid var(--line);padding:6px 16px 16px;display:flex;flex-direction:column}
+.q{padding:14px 0;border-bottom:1px dashed var(--line);display:flex;flex-direction:column;gap:8px}
+.q:last-child{border-bottom:0}
+.qtext{font-family:var(--f-read);font-size:1.06rem;line-height:1.5;max-width:65ch}
+.marks{display:flex;flex-wrap:wrap;gap:6px}
+.mark{font:inherit;font-size:.8rem;font-weight:600;cursor:pointer;border-radius:999px;padding:5px 12px;border:1px solid var(--line);background:var(--surface);color:var(--muted)}
+.mark:hover{color:var(--ink)}
+.mark:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.mark.hard[aria-pressed="true"]{background:var(--hard-soft);color:var(--hard);border-color:var(--hard)}
+.mark.help[aria-pressed="true"]{background:var(--help-soft);color:var(--help);border-color:var(--help)}
+.q.is-hard{box-shadow:inset 3px 0 0 var(--hard);padding-left:12px}
+.q.is-help{box-shadow:inset 3px 0 0 var(--help);padding-left:12px}
+.q.is-hard.is-help{box-shadow:inset 3px 0 0 var(--hard),inset 6px 0 0 var(--help);padding-left:14px}
+.choice{display:flex;flex-direction:column;gap:8px;padding:12px 0;border-top:1px solid var(--line)}
+.choice:first-of-type{border-top:0;padding-top:0}
+.choice .tag{font-size:.74rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.choice.hard .tag{color:var(--hard)} .choice.help .tag{color:var(--help)}
+.choice .picked{font-family:var(--f-read);font-size:1.02rem}
+.choice .picked.empty{color:var(--muted);font-style:italic}
+.probe{border-left:4px solid var(--accent);background:var(--accent-soft);border-radius:0 var(--r) var(--r) 0;padding:14px 16px;display:flex;flex-direction:column;gap:6px}
+.probe p{font-family:var(--f-read);font-size:1.12rem;line-height:1.5}
+details.more>summary{cursor:pointer;color:var(--accent);font-weight:600;font-size:.88rem}
+details.more ol{margin:10px 0 0;padding-left:1.4em;display:flex;flex-direction:column;gap:6px;font-size:.9rem}
+.reminder{display:grid;gap:6px;font-size:.9rem}
+.reminder span b{font-weight:700}
+.reminder .h b{color:var(--hard)} .reminder .p b{color:var(--help)}
+.check{display:flex;gap:8px;align-items:center;font-size:.92rem}
+.check input{width:18px;height:18px;accent-color:var(--accent)}
+.finish{background:var(--accent-soft);border-radius:var(--r);padding:18px;display:flex;flex-direction:column;gap:12px}
+.finish .row{display:flex;flex-wrap:wrap;gap:8px}
+.field{display:flex;flex-direction:column;gap:6px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:8px;font-size:.88rem;max-width:calc(100% - 32px);z-index:20;box-shadow:0 6px 24px rgb(0 0 0 / .18)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+@media (max-width:520px){header.top{position:static}h1{font-size:1.65rem}.prose{font-size:1.04rem}details.comp>summary{grid-template-columns:auto 1fr}.cside{grid-column:1/-1;flex-direction:row;justify-content:space-between;align-items:center}.cdesc{grid-column:2}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="brandrow">
+      <p class="brand"><small>AI in ELT · Friday, 23 October</small>Exploring the AI Lang Guidelines</p>
+      <div class="tools">
+        <button class="btn small" id="t-save" type="button">Save progress</button>
+        <button class="btn small" id="t-load" type="button">Load progress</button>
+        <button class="btn small primary" id="t-word" type="button">Download Word document</button>
+      </div>
+    </div>
+    <nav aria-label="Steps"><ol class="steps" id="steps">
+      <li><button type="button" data-go="1">Start</button></li>
+      <li><button type="button" data-go="2">1 Orient</button></li>
+      <li><button type="button" data-go="3">2 Engage</button></li>
+      <li><button type="button" data-go="4">3–4 Try and prepare</button></li>
+    </ol></nav>
+  </div>
+</header>
+<input type="file" id="file" accept=".json,application/json" class="sr" tabindex="-1" aria-hidden="true">
+
+<main class="wrap">
+  <p class="banner" id="banner">Your work is not saved automatically. Use <b>Save progress</b> to keep a copy, or <b>Download Word document</b> when you finish.</p>
+
+  <!-- PAGE 1 -->
+  <section class="page" id="p1" aria-labelledby="h1">
+    <div class="stack">
+      <p class="eyebrow">Team worksheet</p>
+      <h1 id="h1">Exploring the AI Lang Guidelines</h1>
+    </div>
+    <div class="stack lede">
+      <p>The <em>Guidelines for the use of AI in Language Education</em> were developed in the AI Lang project of the European Centre for Modern Languages. They rest on four principles: AI-assisted language education should be <strong>safe</strong>, <strong>responsible</strong>, <strong>purposeful</strong> and <strong>human-centred</strong>. Each principle is put into practice through two guidelines, eight in all. Each guideline is described through competences, written as questions, and each competence comes with reflection questions.</p>
+      <p>The Guidelines are a reflective tool, not a compliance checklist. The reflection questions have no correct answers. They are meant to help you think about your own teaching, alone, with colleagues, or with learners.</p>
+    </div>
+    <div class="panel">
+      <h2>What you will do</h2>
+      <ol class="path">
+        <li><span><strong>Orient.</strong> Read your guideline and sum up, in one sentence, what it asks of a language teacher.</span></li>
+        <li><span><strong>Engage.</strong> Choose one competence and work through its reflection questions for a teaching situation one of you knows. Mark the question you found hardest and the one you found most helpful.</span></li>
+        <li><span><strong>Try.</strong> Test one point with a general-purpose chatbot.</span></li>
+        <li><span><strong>Prepare.</strong> Note something hard, something helpful and a question for the plenary.</span></li>
+      </ol>
+    </div>
+    <div class="panel">
+      <h2 id="team-h">Our team</h2>
+      <div class="names" id="names" role="group" aria-labelledby="team-h"></div>
+      <div><button class="btn small" type="button" id="add-name">+ Add a name</button></div>
+    </div>
+    <div class="panel">
+      <h2 id="gsel-h">Choose your guideline</h2>
+      <select id="gsel" aria-labelledby="gsel-h"></select>
+      <div class="confirm" id="gconfirm" hidden>
+        <p>Changing the guideline will clear the notes you made on the next pages. Your team names stay.</p>
+        <div class="row"><button class="btn small" type="button" id="gc-yes">Change guideline</button><button class="btn small" type="button" id="gc-no">Keep current guideline</button></div>
+      </div>
+      <div class="navrow" style="justify-content:flex-start;align-items:center">
+        <button class="btn primary" type="button" id="start" disabled>Start →</button>
+        <span class="hint" id="start-hint">Choose a guideline to begin.</span>
+      </div>
+    </div>
+    <div class="note">
+      <p><strong>Continuing earlier work?</strong> Use <strong>Load progress</strong> and choose your .json file to pick up where you left off.</p>
+    </div>
+    <div class="note">
+      <p><strong>Prefer pen and paper?</strong> A printed version of this worksheet is available. Ask your instructors for a copy.</p>
+    </div>
+  </section>
+
+  <!-- PAGE 2 -->
+  <section class="page" id="p2" hidden aria-labelledby="g2-title">
+    <div class="stack">
+      <p class="eyebrow">Step 1 of 4 · Orient</p>
+      <span class="chip" id="g2-chip"></span>
+      <h1 id="g2-title"></h1>
+      <p class="gq" id="g2-gq"></p>
+    </div>
+    <div class="note"><p>Read the text of your guideline. You do not need to read every word: look for what it asks teachers to notice, decide or do.</p></div>
+    <article class="prose" id="g2-text"></article>
+    <div class="panel">
+      <div class="field">
+        <label class="lab" for="summary">In one sentence, what does this guideline seem to ask of language teachers?</label>
+        <textarea id="summary" data-bind="summary" rows="2" placeholder="This guideline asks teachers to…"></textarea>
+        <span class="hint">Keep it to one sentence. You will see it again in your Word document.</span>
+      </div>
+    </div>
+    <div class="navrow"><button class="btn" type="button" data-go="1">← Back</button><button class="btn primary" type="button" data-go="3">Next: Engage →</button></div>
+  </section>
+
+  <!-- PAGE 3 -->
+  <section class="page" id="p3" hidden aria-labelledby="h3t">
+    <div class="stack">
+      <p class="eyebrow">Step 2 of 4 · Engage</p>
+      <span class="chip" id="g3-chip"></span>
+      <h1 id="h3t">Competences and reflection questions</h1>
+    </div>
+    <div class="note"><p>Open one competence and work through its reflection questions together. Answer them for a teaching situation one of you knows. If you have time, open a second competence. Then mark the question you found <strong>hardest</strong> and the one you found <strong>most helpful</strong>.</p></div>
+    <div class="field">
+      <label class="lab" for="situation">The teaching situation we have in mind</label>
+      <input type="text" id="situation" data-bind="situation" placeholder="e.g., a Year 9 English class, about 25 learners, B1">
+    </div>
+    <div class="stack" id="comps"></div>
+    <div class="panel" aria-labelledby="choices-h">
+      <h3 id="choices-h">Your choices</h3>
+      <div class="choice hard">
+        <span class="tag">Hardest</span>
+        <p class="picked" id="pick-hard"></p>
+        <label class="sr" for="hardWhy">Why was it hard?</label>
+        <textarea id="hardWhy" data-bind="hardWhy" rows="2" placeholder="Why was it hard? The wording, missing context, no obvious answer…"></textarea>
+      </div>
+      <div class="choice help">
+        <span class="tag">Most helpful</span>
+        <p class="picked" id="pick-help"></p>
+        <label class="sr" for="helpWhy">Why was it helpful?</label>
+        <textarea id="helpWhy" data-bind="helpWhy" rows="2" placeholder="Why was it helpful?"></textarea>
+      </div>
+    </div>
+    <div class="navrow"><button class="btn" type="button" data-go="2">← Back</button><button class="btn primary" type="button" data-go="4">Next: Try and prepare →</button></div>
+  </section>
+
+  <!-- PAGE 4 -->
+  <section class="page" id="p4" hidden aria-labelledby="h4t">
+    <div class="stack">
+      <p class="eyebrow">Steps 3 and 4 of 4 · Try and prepare</p>
+      <span class="chip" id="g4-chip"></span>
+      <h1 id="h4t">Try it, then prepare for the plenary</h1>
+    </div>
+    <div class="panel">
+      <h2>Try it with a chatbot</h2>
+      <p>Test one point from your guideline with a general-purpose chatbot. Here is a suggestion for your guideline. You can also test something else you noticed.</p>
+      <div class="probe"><span class="eyebrow" id="probe-label"></span><p id="probe-text"></p></div>
+      <p class="hint">Do not enter personal data about real learners or colleagues.</p>
+      <label class="check"><input type="checkbox" id="skipped" data-bind="skipped"> We skipped this step</label>
+      <div class="field"><label class="lab" for="tool">Chatbot we used</label><input type="text" id="tool" data-bind="tool" placeholder="Name of the tool"></div>
+      <div class="field"><label class="lab" for="prompt">What we asked</label><textarea id="prompt" data-bind="prompt" rows="3" placeholder="Paste or type your prompt"></textarea></div>
+      <div class="field"><label class="lab" for="notice">What did we notice?</label><textarea id="notice" data-bind="notice" rows="3" placeholder="What it did well, what it got wrong, what surprised you…"></textarea></div>
+    </div>
+    <div class="panel">
+      <h2>Prepare for the plenary</h2>
+      <p>Write one note each for the board. Your marked questions from the previous page are shown as a reminder.</p>
+      <div class="reminder"><span class="h"><b>Hardest:</b> <span id="rem-hard"></span></span><span class="p"><b>Most helpful:</b> <span id="rem-help"></span></span></div>
+      <div class="field"><label class="lab" for="prepHard">Something we found hard</label><input type="text" id="prepHard" data-bind="prepHard" placeholder="Short enough for a sticky note"></div>
+      <div class="field"><label class="lab" for="prepHelp">Something we found helpful</label><input type="text" id="prepHelp" data-bind="prepHelp" placeholder="Short enough for a sticky note"></div>
+      <div class="field"><label class="lab" for="prepQ">A question we still have</label><input type="text" id="prepQ" data-bind="prepQ" placeholder="Short enough for a sticky note"></div>
+    </div>
+    <div class="finish">
+      <h3>Well done</h3>
+      <p>Download your work before you close this page.</p>
+      <div class="row"><button class="btn primary" type="button" data-act="word">Download Word document</button><button class="btn" type="button" data-act="save">Save progress (.json)</button></div>
+    </div>
+    <div class="navrow"><button class="btn" type="button" data-go="3">← Back</button></div>
+  </section>
+</main>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+<script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js"></script>
+<script>
+const DATA = [{"id": 1, "title": "Comply with existing legal requirements and institutional standards", "principle": {"num": "I", "name": "safe", "question": "Are our uses of artificial intelligence in language education legally compliant, transparent, and low-risk?"}, "paras": ["Although competent authorities, both at national and supranational (e.g., European Union) level, are beginning to address some challenges associated with the growth of artificial intelligence (see section 1.3), the use of AI in education remains largely untested legal territory (Havinga et al., 2024; Holmes & Porayska-Pomsta, 2023). As language teachers cannot yet confidently rely on conventional practice or established legal precedent, caution and informed judgment are necessary to ensure that their practices are compliant with any existing legislation and consistent with the policies and standards of their institution. Some considerations they need to bear in mind relate to terms of service and age restrictions, copyright and intellectual property, and accountability and transparency. Sometimes, institutional policies might provide guidance on some or all these areas; where such policies exist, teachers should familiarise themselves with them and ensure that their use of AI tools aligns with institutional expectations.", "Regarding possible restrictions, teachers should ensure that the use of AI tools in language education does not result in students being exposed to content or interactions that are prohibited by local law. Additionally, they should be aware of any restrictions in the legally binding terms of service of the applications they use, such as terms that might require paid plans for institutional or professional use or terms that restrict use to older individuals (typically 13+ or 18+). Institutional procurement or IT policies may also restrict which tools are approved for use with learners. Teachers should also ensure that learners are legally competent to consent to the terms of service (or, alternatively, they should seek permission from their parents or guardians), and that users or their guardians are proficient in the language in which the terms and conditions are stated, in order to ensure informed consent.", "The ability of generative AI to generate, remix or translate content such as text, images and videos can also give rise to legal concerns, especially when AI tools are used to produce simplified or translated versions of copyrighted content. While legal provisions regarding copyright vary, sometimes permitting limited educational use, language teachers should nevertheless ensure that all AI-generated content used in class is properly attributed and that ownership of intellectual property (including that of the learners) is respected. Where policies on academic integrity or intellectual property exist, which address and identify AI-generated content, these should inform teachers’ practice. This can be done, for example, by adding information about the original source and the methods used to adapt the text. Schools and education systems might need to generate policies to ensure consistent application of these practices.", "A third set of legal concerns relates to accountability and transparency, or what is sometimes termed the Fairness, Accountability, Transparency and Ethics (FATE) requirement (Memarian & Doleck, 2023). Whether planning learning experiences or engaging in assessment, teachers should be aware of the complexities associated with delegating tasks to non-accountable agents, such as agentic AI systems that can complete tasks or make decisions without being held legally, ethically, or professionally responsible for the outcomes. In other words, teachers must be aware of their own responsibility for poor learning outcomes, unfair assessments, or inappropriate learning experiences resulting from automated methods. Institutional accountability frameworks, where they exist, should make explicit how responsibility is allocated when AI is involved in consequential decisions about learners."], "comps": [{"n": 1, "can": "I can understand and use AI tools lawfully", "desc": "How fully do the AI tools I use align with local, national, and institutional legal frameworks?", "questions": ["Where can I verify that a tool meets legal or institutional standards?", "Do I check and summarise the main points of a tool’s terms before students use it?", "How do I ensure learners (or guardians) understand what they agree to?", "What steps do I take to prevent exposure to illegal or harmful content?"]}, {"n": 2, "can": "I can protect intellectual property", "desc": "How carefully does the content I (co)generate with AI adhere to intellectual property laws?", "questions": ["How do I attribute adapted or AI-generated materials? Would my attribution practices hold up if questioned by a colleague, a learner, or a rights-holder?", "How do I safeguard learners’ creative work from being reused without consent?", "How am I modelling the intellectual property practices I expect from my learners when they use AI?"]}, {"n": 3, "can": "I can maintain responsibility for the use of AI in my teaching", "desc": "How do I maintain responsibility as a teacher when delegating tasks to AI applications?", "questions": ["Why do I need AI to assist in this task, instead of relying on other tools?", "When AI generates feedback, or learning materials, what does my review process look like before that output reaches learners?", "How would I explain my use of AI to learners or colleagues?", "How do I provide space for learners to challenge AI-generated output?", "How am I modelling the transparent use of AI in my teaching?"]}], "probe": "Find the chatbot's terms: minimum age, conditions for institutional or professional use."}, {"id": 2, "title": "Safeguard the data security and digital safety of all participants", "principle": {"num": "I", "name": "safe", "question": "Are our uses of artificial intelligence in language education legally compliant, transparent, and low-risk?"}, "paras": ["Education providers have an ethical responsibility, or duty of care, to ensure the privacy and data security of people involved in language teaching and learning. Existing legislation, some of which predates the widespread adoption of artificial intelligence, generally provides robust frameworks, but cannot fully anticipate the pace and complexity of technological development. This means that legal compliance, though necessary, does not always provide sufficient protection for users in language education, where activities routinely involve the sharing of personal narratives, voice recordings, and written samples, and where learners are often minors or members of vulnerable populations whose data warrants heightened protection.", "Artificial intelligence applications function by collecting learner data, such as voice recordings or writing samples, and reacting to such input. For example, when a learner engages with a conversational agent for speaking practice, conversations about personal experiences may be retained; similarly, texts on controversial topics, produced for developing writing skills, might be retained by AI-supported feedback applications. Applications might also harvest data beyond what is strictly required for educational purposes, such as personal identifiers (cookies), device information, or engagement and behavioural metrics (Liu & Khalil, 2023). Such practices are generally legal, assuming informed consent (see Guideline 1). However, digital tools need to be vetted to ensure that their data collection practices align with pedagogical needs and that issues of informed consent are appropriately addressed and documented.", "Educators should also be aware that user content (e.g., prompts, voice samples) and metadata might be retained in ways that are hard (or, at times, impossible) to erase. This can be problematic, as obsolete or poorly managed data storage systems may pose privacy risks. Even anonymised data might be compromised through accidental exposure or used for profiling (e.g., revealing association with minoritised linguistic groups, learning differences, or non-academic attributes like sexual, religious and political affiliations). Especially when working with vulnerable individuals, such as underage learners, migrants, refugees and asylum seekers, AI use is best limited to trusted applications, and users need to be educated about data security best practices, such as minimizing the disclosure of personally identifiable information in prompts and uploads, avoiding the sharing of identifiable work, and reporting suspected breaches promptly through established institutional channels.", "Another issue that warrants careful consideration is the possibility of data mining, an issue not restricted to AI applications, but amplified in them. Such practices become problematic when data generated in educational settings are repurposed for unauthorised machine training, commercial or even surveillance purposes. Data mining can also be an issue when an application uses user-provided data (and possibly metadata) for training the AI model or learner profiling. While such profiles can help personalise learning, they also raise questions of consent and representation. They can also exacerbate linguistic bias, and (where AI-assisted assessment is allowed) they might result in flawed assessment outcomes. Educators need to monitor how learners are guided through content, and they should use their professional judgment to adapt or override AI suggestions."], "comps": [{"n": 4, "can": "I can identify what types of data are collected by AI applications, which might be misused", "desc": "How confidently can I identify what types of data (e.g., voice recordings, writing samples, metadata) are collected when using AI applications in language education?", "questions": ["What routines do I have (or can I put in place) for checking whether AI tools require learners to sign in, and (if so) what data they collect?", "How do I decide whether data collection by AI applications is pedagogically needed and proportionate for language learning purposes?", "What procedures do I have (or can I put in place) for deleting user data or preventing it from being used for purposes beyond the classroom?", "How might I adapt the use of AI tools to protect learners’ rights and identities?"]}, {"n": 5, "can": "I can raise awareness about the data AI applications gather and its possible uses and mis-uses", "desc": "How successfully can I raise awareness of learners, colleagues and parents about risks to data privacy?", "questions": ["Are there learners in my classroom whose personal data could put them at risk if mishandled?", "How might I explain data privacy risks to learners or colleagues in accessible and practical terms?", "How might I involve learners in reviewing the privacy settings of a tool we use together?", "What should I discuss with my class or team about the implications of learner profiling?"]}], "probe": "Check whether the chatbot needs a sign-in, what it collects, and how to delete conversations."}, {"id": 3, "title": "Promote social justice, linguistic, and cultural diversity", "principle": {"num": "II", "name": "responsible", "question": "Does our use of AI position our teaching as a force for positive change?"}, "paras": ["Just like other learning materials (Apple, 1992), AI systems encode structural hierarchies in language education. They reflect the priorities, blind spots and power structures of the contexts in which they were designed, and the languages, cultures and epistemologies that dominate their training data. In language education, where questions of identity, belonging and linguistic diversity are central, this is not an abstract concern. Guideline 3 therefore calls on language teachers to move beyond unreflective adoption of AI tools, toward a critically informed and transformative practice that actively uses AI as a lever for greater equity and inclusion.", "Artificial intelligence holds both promise and risk for linguistic diversity. Power disparities between languages, linguistic varieties, and linguistic communities are well documented in the literature (e.g., Pennycook, 2021; Phillipson, 1992; Rosa, 2019). Artificial intelligence can counteract this potential bias by providing easier access to authentic or adapted materials in languages for which published learning resources may not be available. However, the uncritical use of AI in language education may amplify such disparities, as large language models (LLMs) tend to privilege languages (and varieties within languages) with high online visibility and status in AI output (Navigli et al., 2023), whereas under-resourced languages, including heritage languages, may be entirely absent. Challenging such bias might involve deliberately prompting AI tools in ways that surface marginalised languages, varieties and perspectives. It could also involve greater awareness of, and transparency about, the language varieties used as a model during accuracy-focused work, or a broader range of corrective alternatives.", "AI tools do not enter language classrooms free of cultural bias: the datasets on which large language models are trained tend to reflect the norms of dominant social groups, which could exacerbate processes of cultural hegemony and epistemic injustice (Fricker, 2007; Resnik, 2025; Stracke, 2024). When this goes unrecognised, and language education is further reduced to instrumental goals, learners' identities and cultural capital risk marginalisation (Angelo, 2021; Atari et al., 2023; Helm et al., 2024). With appropriate training and resources, teachers who approach AI output critically, rather than as ‘objective’ or ‘authoritative’, are well placed to resist these tendencies, and to design AI-assisted activities that connect to established traditions of critical language pedagogy by actively affirming learners' cultural and linguistic repertoires (Jeon et al., 2025; Krulatz et al., 2018; Norton & Toohey, 2011).", "Ensuring that AI-supported language education remains socially just also depends on the availability of technological infrastructure as well as the equitable and sustainable participation in digitally mediated learning environments, as described in the UN sustainable development goals (United Nations, 2015). This involves addressing infrastructure barriers, such as disparities in access to electricity and high-speed internet (Bird et al., 2020; Broadband Commission for Sustainable Development, 2020), as well as barriers related to teachers’ and learners’ beliefs, digital confidence, and opportunities for sustained training (Fuller, 1969; George et al., 2006; Venkatesh, 2022). To that end, developing the teachers’ Technological Pedagogical Content Knowledge (TPACK; Mishra & Koehler, 2006) constitutes an important step that enables educators to exercise informed professional judgment, critically evaluate AI tools, and design contextually responsive pedagogies that mitigate inequity rather than reproduce it."], "comps": [{"n": 6, "can": "I can use AI applications in ways that sustain linguistic diversity", "desc": "How effectively does my use of AI sustain or promote linguistic diversity?", "questions": ["Which languages and varieties are represented in the AI tools I use, and which are absent or poorly served?", "How do I ensure that feedback or resources reflect multiple linguistic varieties and registers?", "When I use AI for accuracy-focused feedback, do I specify which language variety or register is the target, and do I share that information transparently with learners?", "Is the AI output I use reproducing the same linguistic hierarchies I would challenge in a conventional textbook?", "How might instances of linguistic bias in AI output be treated as pedagogical opportunities?"]}, {"n": 7, "can": "I can mitigate algorithmic bias", "desc": "How vigilantly do I ensure that AI output in my class does not reproduce biases towards certain knowledge, voices and values?", "questions": ["Whose perspectives or interests are represented in the data that my AI tools rely on?", "What prompting strategies might I use to actively generate an inclusive range of perspectives, knowledge systems or cultural framings?", "What is my process for reviewing AI-generated content for bias before it reaches learners?", "How do I create space for learners to bring their own knowledge and cultural perspectives into dialogue with AI output?"]}, {"n": 8, "can": "I can ensure that the AI tasks I design are accessible to all learners", "desc": "How do I make sure that the AI tasks I design are accessible to all learners?", "questions": ["What disparities in access to AI tools am I aware of in my context?", "How can I adapt my teaching to accommodate learners with limited access or skills?", "What resources or partnerships can I use to bridge these gaps?"]}], "probe": "Ask for feedback on a short learner text twice, once naming a target variety and register and once not, and compare."}, {"id": 4, "title": "Foster environmental sustainability", "principle": {"num": "II", "name": "responsible", "question": "Does our use of AI position our teaching as a force for positive change?"}, "paras": ["Artificial intelligence has immense potential to transform language education, yet it also introduces a range of social and environmental responsibilities. The environmental footprint of AI tools, including carbon emissions, water usage and energy demands, has become a pressing concern (Luccioni et al., 2023). Building the necessary infrastructure, such as servers, computers, and data centres, contributes heavily to resource consumption and environmental degradation, and the training of Large Language Models (LLMs) also results in significant greenhouse gas emissions. Additionally, data centres generate substantial heat and require advanced cooling systems, leading to intensive water consumption.", "Sustainable integration therefore requires calibrated use, rather than routine default use. At the level of classroom practice, educators can reduce unnecessary computation by designing prompts and workflows to maximize the quality of responses while minimizing energy use. Another sustainable practice is to evaluate when and why to use AI. For example, when visuals are needed for teaching materials, existing image banks or open-access libraries may be preferable to prompting AI to generate new images. Similarly, for some information-seeking tasks, conventional web searches may entail substantially lower energy costs (10–30 times less energy) than AI generated content (De Vries, 2023). At the institutional and provider levels, sustainability also depends on transparency and accountability. Encouraging AI vendors to disclose environmental metrics, such as carbon and water use per operation or per user, would enable educators and education systems to better understand and weigh the often-invisible externalities of AI deployment. This perspective is now endorsed across leading research communities in both environmental science and education.", "One way to ensure that this potential is met would be to develop competences in effective prompting. The IDEA framework (Park & Choo, 2024) presented overleaf helps guide this process, promoting clear and purposeful prompt design and iterative refinement."], "comps": [{"n": 9, "can": "I can understand the environmental consequences of using AI in Language Education", "desc": "How well am I informed about the environmental consequences of AI use in language education?", "questions": ["How do the tools I use affect people and ecosystems beyond my classroom?", "What invisible costs (energy, data, labour) accompany apparently simple digital actions in my teaching practice?"]}, {"n": 10, "can": "I can reduce the impact of AI use in my classroom", "desc": "To what extent can I reduce the environmental impact of my AI use?", "questions": ["When planning lessons, do I consider whether a low-impact or analogue alternative could achieve the same goal?", "How do I plan, refine, and evaluate my prompts to maximise efficiency in AI use?"]}, {"n": 11, "can": "I can promote environmental sustainability when using AI", "desc": "How effectively do I teach and model environmentally sustainable uses of AI?", "questions": ["How do I share examples of environmentally or socially responsible practice with colleagues?", "What institutional policies or collaborations could reduce the environmental and social footprint of AI in education?"]}], "probe": "Take one planned activity, ask the chatbot for a low-tech alternative, and judge whether it would do."}, {"id": 5, "title": "Enhance theory- and policy-informed language pedagogy", "principle": {"num": "III", "name": "purposeful", "question": "How does AI add genuine pedagogical value and improve the quality of teaching and learning?"}, "paras": ["The effective use of artificial intelligence in language education is a function of the quality of uses rather than the quantity of AI tools and AI-supported activities. Quality, in this context, refers to how rich, inclusive and engaging language learning experiences are, and how artificial intelligence improves learning outcomes.", "Effective language learning requires opportunities for meaningful interaction. This is an area where AI-powered conversational agents might prove helpful, by providing learners with low-stakes spaces for extended communicative practice, particularly in contexts where access to target language speakers is limited (Bibauw et al., 2019; see also Guideline 6). Such interactions can be designed to foreground meaning-making rather than formal accuracy, aligning with communicative and task-based approaches to language teaching (Ellis, 2003; Long, 2015). Additionally, AI can be used to efficiently generate materials for open-ended, contextualised tasks that require learners to negotiate meaning, express personal perspectives and engage in genuine communicative exchange, rather than mechanical practice. Using effective prompting (i.e., clear learning goals, defined outcomes and evaluation criteria; see also Section 2.4), such activities could draw on the learners’ interests, experiences and linguistic repertoires, and provide necessary scaffolding to support the implementation of the tasks. Used in this way, artificial intelligence can be deployed to support the development of communicative competence, aligning with contemporary policy frameworks.", "Additionally, AI tools can serve as valuable assistants in addressing class heterogeneity by supporting the differentiation of learning goals, content, and tasks. They enable teachers to tailor materials to individual learners’ levels, interests, and needs, providing more personalized and inclusive instruction. For instance, speech-to-text functions can assist students who benefit from written transcriptions of spoken language, supporting learners with hearing difficulties or those who process information better visually. Conversely, text-to-speech functions can enhance language learning by introducing more spoken input, aiding pronunciation, listening comprehension, and fluency. Teachers can generate multiple sets of exercises from the same input or adapt learning materials to match students' language proficiency levels. Language teachers can enhance language learning by developing multimodal learning supports assisted by AI, such as visuals, graphics, videos, interactive exercises, and other multimedia resources.", "Just as it has transformed classroom reality, the emergence of AI has radically changed assessment in language learning (Kherbouche, 2026). Traditional analogue assessment formats, such as essays and presentations, can no longer be unproblematically regarded as evidence of learning. AI challenges teachers to rethink evaluation practices, shifting the focus from artefacts of knowledge to the learning process, collaborative learning and the development of communicative competence. While mindful of legal restrictions on high-stakes assessment, teachers can leverage the ability of AI to provide learners with positive and constructive comments for feedback purposes in a number of ways, such as providing students with personalized feedback and feedforward based on transparent assessment criteria, or organising structured peer and group assessment. Furthermore, AI-assisted assessment can help mitigate some cases of unreliability in human assessment, such as teacher fatigue, timing (within the academic calendar or within a day), the examiner’s physical or psychological state, the sequence of student submissions, and subjective overreactions to certain error types etc., which have been well documented before the emergence of AI (Fleming, 2007)."], "comps": [{"n": 12, "can": "I can use AI in ways that foreground meaning-making and authenticity", "desc": "How consistently do my AI-assisted practice opportunities foreground meaning-making and authentic language use?", "questions": ["When I use conversational agents or AI-generated tasks for communicative practice, am I clear about what communicative goals I want learners to achieve?", "When AI interaction prioritises formal accuracy over meaningful communication, how do I notice this, and what do I do about it?", "How do I compare the quality of communicative engagement in AI-supported activities with that in teacher-led or peer interaction tasks?"]}, {"n": 13, "can": "I can design clearly structured language learning tasks with the help of AI", "desc": "To what extent do the tasks I design with AI support have clear learning goals, defined communicative outcomes and transparent evaluation criteria?", "questions": ["How do I ensure that the outcomes of AI-supported communicative tasks are defined broadly enough to allow for genuine language use, rather than channelling learners toward a single expected response?", "When designing AI-supported tasks, can I co-create prompts with learners to draw on their interests, experiences and linguistic repertoires?", "When an AI-supported communicative task does not produce the learning outcomes I intended, what does my process for reviewing and revising the task look like?"]}, {"n": 14, "can": "I can personalise language learning experiences through the use of AI", "desc": "How successfully can I use AI tools to personalise learning?", "questions": ["Which elements of my teaching (e.g., goals, content, tasks, feedback) am I currently differentiating with AI?", "How might I use speech-to-text, text-to-speech or other assistive AI functions to support learners with specific needs without singling them out?", "How do I evaluate whether AI-assisted differentiation is actually improving learning outcomes for the learners it is intended to support, rather than simply generating more varied materials?"]}, {"n": 15, "can": "I can use AI to help provide feedback in responsible ways", "desc": "How transparent and effective is the way I integrate AI into feedback processes?", "questions": ["When I use AI to generate feedback for learners, how do I communicate to them that AI has been involved?", "When AI feedback and my own professional judgment diverge, how do I handle that divergence transparently with learners?", "How do I know whether AI-assisted feedback is actually improving learner performance and self-regulation over time, rather than simply providing more feedback more quickly?"]}], "probe": "Ask for a short communicative practice activity; check whether the goal is clear and meaning comes before accuracy."}, {"id": 6, "title": "Create expanded language learning opportunities", "principle": {"num": "III", "name": "purposeful", "question": "How does AI add genuine pedagogical value and improve the quality of teaching and learning?"}, "paras": ["The question of whether artificial intelligence adds value to language teaching and learning requires a qualitative judgment of what AI use makes possible that was either impossible or pragmatically impractical previously. A useful starting point in this judgment is whether AI use replicates existing practice or genuinely expands what teachers and learners can do. What counts as desirable change is context-dependent and ideologically contested (Alim & Paris, 2017; Hornberger & Johnson, 2007; Pennycook, 2010), so Guideline 6 does not focus on examples of promising use; rather, it explores how the intentional use of artificial intelligence can create affordances that expand learner opportunity, enhance learner agency and increase the teachers’ capacity. These criteria are not a checklist: they can be applied together or separately depending on the context and goals of language education in any specific setting.", "Expanding learner opportunity involves the use of artificial intelligence to generate learning affordances that were previously unavailable or prohibitively resource-intensive. Examples of such affordances include providing opportunities for communicative practice in languages for which human interlocutors are scarce, and generating personalised feedback at a scale that would be impractical for most teachers. The key diagnostic is that the use of AI in such cases involves the transformation of the language learning experience, as opposed to the superficial or tokenistic reproduction, in a faster and less costly format, of activities that already existed previously, such as drill exercises and closed-form questions. The speed with which generative AI can generate drill-type items (for example, vocabulary practice or multiple-choice questions) should be weighed against their variable language-learning potential, ensuring that such exercises serve clear pedagogical purposes and complement, rather than replace, higher-involvement and meaning-focused work.", "A second criterion is the impact of artificial intelligence on learner agency, i.e., their capacity to direct, shape and take ownership of their learning. The transformative use of artificial intelligence involves practices and resources that support learners in setting their own learning goals, evaluating their own output and making meaningful choices about how and what to learn. This is to be contrasted with usages of artificial intelligence which constrain agency, either by algorithmically channelling learners through pre-structured learning pathways or by foregrounding easily measurable outcomes. What differentiates transformative use from mere automation is the degree of control that learners enjoy over their learning goals, process, and outcomes. This is especially important for language education, which is inextricably linked to considerations of identity, motivation and willingness to communicate, all of which may be impacted by the use of AI (Fathi et al., 2024; Liu & Reinders, 2025; Yuan & Liu, 2025).", "Turning to the teachers, the third criterion for the intentional transformation of the language learning experience, concerns what AI makes possible for teachers. When thinking of teacher capacity, the focus is not just on time saved but on the expansion of their pedagogical horizons. Automation of well-specified, low-judgement tasks (e.g., first pass feedback, routine differentiation) is valuable insofar as it frees teacher time for work that is difficult to automate responsibly: interpreting learner trajectories, building classroom relationships, and orchestrating dialogic interaction. However, the use of AI to merely replicate what teachers already did does not genuinely expand capacity in the sense discussed here. AI becomes valuable when it helps teachers notice what they would otherwise miss, explore new pedagogical approaches or design learning experiences that would otherwise have been beyond their reach. Transformative education, in this sense, involves making teachers more capable and more thoughtful practitioners."], "comps": [{"n": 16, "can": "I can use AI to transform language learning experiences", "desc": "To what extent do the AI-assisted tasks I design transform the language learning experience?", "questions": ["What is one example of a learning opportunity you created using AI that would otherwise not be feasible in your classroom or learning context? In what ways have students benefited from this?", "What would be lost if I removed AI from a task entirely?", "How do the AI-supported activities I use complement meaning-focused work? What pedagogical purposes do they serve beyond efficiency?", "What are the learning outcomes that my AI-supported activities serve, and how well do they align with my instructional goals?"]}, {"n": 17, "can": "I can use AI in ways that support the agency of language learners", "desc": "To what extent do the AI-assisted tasks I design increase learner agency?", "questions": ["Do the AI tools I use open up choices for learners, or do they channel them through pre-structured pathways?", "How much control do learners have over their goals, process and outcomes?", "How might the AI tools I use affect learners' sense of ownership over their language learning?"]}, {"n": 18, "can": "I can improve my teacher capacity through the use of AI", "desc": "To what extent do the AI-assisted tasks I design improve my teacher capacity?", "questions": ["How am I using the time that is saved by delegating aspects of my work to artificial intelligence?", "In what ways might AI help me notice things about my learners or my practice that I would otherwise have missed?", "Which of the AI tools I use are helping me do new things as a language teacher, and which ones are helping me do the same things more efficiently?"]}], "probe": "Ask for an activity that would be hard to do without AI; judge whether it is new or only faster."}, {"id": 7, "title": "Prepare learners for critical, healthy engagement with AI", "principle": {"num": "IV", "name": "human-centred", "question": "How can teachers and learners use AI reflectively and maintain professional agency?"}, "paras": ["Artificial intelligence is increasingly present in the lives of language learners, both inside and beyond the classroom, often without critical framing that would ensure its effective and safe use. This guideline examines how language education can provide learners with competences needed to engage with AI tools and AI output in a thoughtful, ethical, and effective way. This involves developing AI literacy skills, ensuring learner well-being in learning environments where human and non-human input co-exist, and preserving the learners’ identity, voice and plurilingual repertoire in spite of the dominant/standardised norms and content that LLMs tend to (re)produce.", "Language education is well positioned to foster the competences that learners need to develop AI literacy, especially when working in traditions that foster critical literacy (Edge, 2006; Pennycook, 2010). Evaluating texts for accuracy, register, communicative and cultural appropriateness, and ideological stance are some of the practices that are likely to exist in language learning curricula, and these can be readily leveraged to compare human- and AI-generated texts. Language teachers can rely on established disciplinary strengths to help learners understand how discourse is generated, and classroom work can extend the collaborative critique of hallucinations and embedded bias. Similarly, existing practices in teaching speaking and writing can be deployed to develop effective prompting strategies, and to interrogate, revise, and respond to AI output. Such activities can simultaneously function as language learning and AI literacy education.", "To ensure learner well-being, teachers can take steps to calibrate AI-supported tasks and practice opportunities with authentic human interaction. Among other things, they can monitor for isolation, fatigue, and disengagement associated with excessive screen time or AI overuse (Deep & Chen, 2025; Lepp et al., 2022; Zhang & Liu, 2025). An additional concern is that digital routines in the language classroom should remain age-appropriate and consistent with the learners’ cognitive strengths and needs.", "A third concern relates to learner identity, and the risk that this may be eroded by the increase in AI-supported practices. Language education has a long humanist tradition, with a commitment to voice, personal narrative, and respect for diversity that can be usefully brought to bear here. For example, teachers may design AI-supported tasks that use learner experience and personal narrative as the starting point, treating AI-generated content as a foil or interlocutor rather than a model, and inviting learners to compare, contest, and personalise its output. Another possibility involves using AI-supported speaking and writing tasks in ways that preserve space for genuine authorial choice, by framing AI as a resource for drafting or editing rather than a source of finished text. Additionally, it is possible to leverage the multilingual capabilities of AI to create space for dynamic cross-linguistic practice, using translation, comparison, and code-switching as resources for meaning-making."], "comps": [{"n": 19, "can": "I can use AI to support the development of (critical) literacy skills", "desc": "How well do I integrate language practice and AI literacy development in my teaching practice?", "questions": ["Which critical literacy practices in my current teaching can I readily transfer to the evaluation of AI-generated texts?", "How do I help learners critique AI-generated content, and what language learning opportunities does this create?", "What can I do to integrate AI literacy work in meaningful language learning activity rather than treat it as a separate technical skill?", "How might effective prompting be taught as a language learning activity (e.g., by connecting to existing work on register, genre, and communicative purpose)?"]}, {"n": 20, "can": "I can use AI to nurture learners’ well-being", "desc": "How effectively do I preserve learner well-being in an AI-assisted environment?", "questions": ["What signs of fatigue, disengagement, or over-reliance on AI do I look for during AI-supported activities? How do I respond when I notice them?", "How do I adapt AI-supported tasks to accommodate learners with different cognitive strengths, learning differences, or levels of digital confidence?", "What can I do to encourage learners to reflect on their own experience of AI-assisted learning, its effect on their wellbeing and possible over-dependence?"]}, {"n": 21, "can": "I can use AI to support the development of the learners’ identity", "desc": "How well do the AI-assisted tasks that I design affirm learner identity?", "questions": ["What are my teaching options, when AI-supported tasks appear to be producing uniform or formulaic output that overrides learner voice?", "In what ways do I invite learners to draw on their own experiences and perspectives to compare, contest, or personalise AI-generated content?", "What procedures do I have in place to help learners notice their authorial choice, tone, stance, and personal expression and compare them to AI output?"]}], "probe": "Have the chatbot write a short text on a topic you know well and critique its accuracy, register and stance."}, {"id": 8, "title": "Empower language teachers as reflective professionals", "principle": {"num": "IV", "name": "human-centred", "question": "How can teachers and learners use AI reflectively and maintain professional agency?"}, "paras": ["Language teachers working in AI-assisted classrooms must simultaneously manage the immediate demands of instruction and maintain a reflective distance from their practice. Artificial intelligence, used thoughtfully, can support both of these demands simultaneously by helping teachers plan more deliberately, observe more systematically, and interpret their teaching more deeply. Guideline 8 draws on established frameworks for reflective practice (Farrell, 2022; Schön, 1983) to propose ways in which AI can support teachers as inquirers into their own language teaching.", "Just like any other instance of teaching, AI-assisted language education also requires that teachers engage in regular reflection about their professional practice. This involves being able to effectively plan forward (reflection-for-action), which can be supported, for example, by generating variants of a lesson or activity with different degrees of autonomy (e.g., tightly scaffolded vs. open-ended), or counterfactual scenarios (e.g., “what would happen if I only had one student?”) and making structured comparisons between them. It also involves the ability to make pedagogical judgments in (almost) real time, by deploying keen observation skills and pedagogical sensitivity for monitoring the implementation of AI-assisted activities. Finally, conversational agents can be leveraged to provide input and feedback after lessons or longer instructional sequences, prompting reflection into the less “accessible aspects of teachers’ work” (D. Freeman, 2016, p. 208), and thus making professional action more purposeful.", "Artificial intelligence can also be used to support forms of professional development, such as classroom-based inquiry, whether framed as action research (Burns, 2010), exploratory practice (Hanks, 2017), or teacher-led scholarship (Sato & Loewen, 2022). For example, teachers can assign Large Language Models the role of a critical friend whose task it is to help define and collaboratively refine a teaching-related puzzle. Alternatively, they could reformulate broad areas of investigation into more precise and researchable research questions. Assuming ethical and legal safeguards are met (see Section 2.3) artificial intelligence can also be used to transcribe audio or video recordings of classroom interactions, identify recurring patterns such as specific grammatical deviations or discourse markers or compare student outputs or proficiency across lessons or groups, thus facilitating systematic analysis.", "With appropriate prompting, AI can promote teacher reflexivity (Edge, 2011), by helping teachers theoretically position themselves and their teaching practices. Choices about how AI is used inevitably position language education within a broader landscape of values. For example, a teacher who routinely uses AI to generate multiple-choice grammar items may be communicating to learners that language learning is mostly about accuracy and measurable outcomes. By contrast, a teacher who uses the same tools to scaffold creative writing might be making different statements about what language education is for. Using AI tools to interrogate and make explicit the pedagogical assumptions embedded in a lesson plan or activity, or to propose an alternative version grounded in a different set of values, can make these choices visible and deliberate rather than habitual. Over time, such reflective habits shape how learners, school leaders, policymakers, and the public come to understand language teaching, as an intellectually serious and socially committed professional practice."], "comps": [{"n": 22, "can": "I can use AI to strengthen my reflective practice", "desc": "How rigorously do I use AI to reflect on my teaching practices?", "questions": ["How often do I use AI tools to revisit a lesson or activity?", "When I ask an AI tool to comment on my teaching, do I provide enough contextual detail for its feedback to be genuinely useful?", "How well do the patterns an AI tool identifies in my practice align with my own professional interpretations?", "How might I systematically record AI-assisted reflections over time to track the development of my thinking?"]}, {"n": 23, "can": "I can critically reflect on my use of AI", "desc": "How critically do I use AI to systematically explore aspects of my teaching practice?", "questions": ["How do I identify which aspects of my teaching are worth investigating?", "Which aspects of classroom-based inquiry can be handled well by artificial intelligence and which require more human engagement?", "Do I use AI tools to surface assumptions in my lesson plans or materials that I might not have noticed myself, or do I mainly use them to confirm decisions I have already made?"]}, {"n": 24, "can": "I can align my use of AI with my teaching values", "desc": "How deeply can I reflect on the values implicit in my use of artificial intelligence?", "questions": ["Thinking about the AI-supported activities I use most frequently, what do they collectively suggest about my teaching beliefs?", "How would I explain the values embedded in my AI use to a learner, a parent, or a policymaker?"]}], "probe": "Describe a lesson and ask for comments; judge whether it surfaced assumptions or only confirmed your choices."}];
+const APP_ID = "ailang-guidelines-explorer";
+const ROMAN_NAME = {I:"safe",II:"responsible",III:"purposeful",IV:"human-centred"};
+const PCOLOR = {I:"var(--p1)",II:"var(--p2)",III:"var(--p3)",IV:"var(--p4)"};
+const NAME_PH = "First name and last name";
+const FIELDS = ["summary","situation","hardWhy","helpWhy","tool","prompt","notice","prepHard","prepHelp","prepQ"];
+const $ = id => document.getElementById(id);
+
+function blank(){return {names:["",""],g:null,summary:"",situation:"",notes:{},hardest:null,helpful:null,hardWhy:"",helpWhy:"",skipped:false,tool:"",prompt:"",notice:"",prepHard:"",prepHelp:"",prepQ:""};}
+let S = blank();
+let page = 1;
+let pendingG = null;
+
+const G = () => DATA.find(d => d.id === S.g) || null;
+const qid = (c,i) => "c"+c.n+"q"+i;
+function qById(id){
+  for (const d of DATA) for (const c of d.comps) for (let i=0;i<c.questions.length;i++) if (qid(c,i)===id) return {d,c,i,text:c.questions[i]};
+  return null;
+}
+function hasWork(){
+  return FIELDS.some(k => (S[k]||"").trim()) || S.skipped || S.hardest || S.helpful || Object.values(S.notes).some(v => (v||"").trim());
+}
+function resetWork(){ const n=S.names; const g=S.g; S=blank(); S.names=n; S.g=g; }
+function toast(msg){ const t=$("toast"); t.textContent=msg; t.hidden=false; clearTimeout(toast._t); toast._t=setTimeout(()=>t.hidden=true,4200); }
+function el(tag, attrs={}, ...kids){
+  const e=document.createElement(tag);
+  for (const [k,v] of Object.entries(attrs)){ if (k==="class") e.className=v; else if (k==="text") e.textContent=v; else if (v!==null && v!==undefined && v!==false) e.setAttribute(k,v===true?"":v); }
+  for (const k of kids){ if (k==null) continue; e.append(k); }
+  return e;
+}
+
+/* ---------- names ---------- */
+function renderNames(){
+  const box=$("names"); box.textContent="";
+  S.names.forEach((v,i)=>{
+    const inp=el("input",{type:"text",id:"name-"+i,placeholder:NAME_PH,"aria-label":"Name "+(i+1),autocomplete:"off"});
+    inp.value=v;
+    inp.addEventListener("input",()=>{S.names[i]=inp.value;});
+    const row=el("div",{class:"namerow"},inp);
+    if (S.names.length>1){
+      const rm=el("button",{type:"button",class:"iconbtn","aria-label":"Remove name "+(i+1),title:"Remove this row",text:"×"});
+      rm.addEventListener("click",()=>{S.names.splice(i,1);renderNames();});
+      row.append(rm);
+    }
+    box.append(row);
+  });
+}
+$("add-name").addEventListener("click",()=>{S.names.push("");renderNames();$("name-"+(S.names.length-1)).focus();});
+
+/* ---------- guideline select ---------- */
+function buildSelect(){
+  const sel=$("gsel"); sel.textContent="";
+  sel.append(el("option",{value:"",text:"Select the guideline you were given…"}));
+  ["I","II","III","IV"].forEach(r=>{
+    const og=el("optgroup",{label:"Principle "+r+": "+ROMAN_NAME[r][0].toUpperCase()+ROMAN_NAME[r].slice(1)});
+    DATA.filter(d=>d.principle.num===r).forEach(d=>og.append(el("option",{value:String(d.id),text:"Guideline "+d.id+" – "+d.title})));
+    sel.append(og);
+  });
+}
+$("gsel").addEventListener("change",e=>{
+  const v=e.target.value?Number(e.target.value):null;
+  if (S.g && v!==S.g && hasWork()){ pendingG=v; $("gconfirm").hidden=false; e.target.value=String(S.g); return; }
+  setGuideline(v);
+});
+$("gc-yes").addEventListener("click",()=>{ S.g=pendingG; resetWork(); pendingG=null; $("gconfirm").hidden=true; renderAll(); toast("Guideline changed. Your notes were cleared."); });
+$("gc-no").addEventListener("click",()=>{ pendingG=null; $("gconfirm").hidden=true; });
+function setGuideline(v){ if (v!==S.g){ S.g=v; resetWork(); } renderAll(); }
+
+/* ---------- pages ---------- */
+function chip(id){ const d=G(); const c=$(id); if(!d){c.textContent="";return;} c.style.setProperty("--pc",PCOLOR[d.principle.num]); c.textContent="Guideline "+d.id+" · Principle "+d.principle.num+": "+d.principle.name; }
+function renderP2(){
+  const d=G(); if(!d) return;
+  chip("g2-chip");
+  $("g2-title").textContent="Guideline "+d.id+": "+d.title;
+  $("g2-gq").textContent="AI-assisted language education should be "+d.principle.name+". "+d.principle.question;
+  const art=$("g2-text"); art.textContent="";
+  d.paras.forEach(p=>art.append(el("p",{text:p})));
+}
+function answered(c){ return c.questions.filter((q,i)=>(S.notes[qid(c,i)]||"").trim()).length; }
+function renderP3(){
+  const d=G(); if(!d) return;
+  chip("g3-chip");
+  const box=$("comps"); const open=new Set([...box.querySelectorAll("details[open]")].map(x=>x.dataset.c)); box.textContent="";
+  d.comps.forEach(c=>{
+    const badge=el("span",{class:"badge",id:"badge-"+c.n});
+    const sum=el("summary",{},
+      el("span",{class:"cnum",text:String(c.n)}),
+      el("span",{class:"ccan",text:c.can}),
+      el("span",{class:"cside"},badge,el("span",{class:"chev","aria-hidden":"true"})),
+      el("span",{class:"cdesc",text:c.desc}));
+    const qs=el("div",{class:"qs"});
+    c.questions.forEach((q,i)=>{
+      const id=qid(c,i);
+      const ta=el("textarea",{id:"n-"+id,rows:"2",placeholder:"Our answer or position…","aria-label":"Notes on: "+q});
+      ta.value=S.notes[id]||"";
+      ta.addEventListener("input",()=>{S.notes[id]=ta.value; updateBadge(c);});
+      const bh=el("button",{type:"button",class:"mark hard","data-q":id,"data-kind":"hardest","aria-pressed":"false",text:"Hardest"});
+      const bp=el("button",{type:"button",class:"mark help","data-q":id,"data-kind":"helpful","aria-pressed":"false",text:"Most helpful"});
+      [bh,bp].forEach(b=>b.addEventListener("click",()=>{ const k=b.dataset.kind; S[k]=(S[k]===id)?null:id; renderMarks(); }));
+      qs.append(el("div",{class:"q",id:"q-"+id},el("p",{class:"qtext",text:q}),ta,el("div",{class:"marks"},bh,bp)));
+    });
+    const det=el("details",{class:"comp","data-c":String(c.n)},sum,qs);
+    if (open.has(String(c.n))) det.open=true;
+    box.append(det);
+    updateBadge(c);
+  });
+  renderMarks();
+}
+function updateBadge(c){ const b=$("badge-"+c.n); if(b) b.textContent=answered(c)+" of "+c.questions.length+" answered"; }
+function renderMarks(){
+  document.querySelectorAll(".mark").forEach(b=>b.setAttribute("aria-pressed",String(S[b.dataset.kind]===b.dataset.q)));
+  document.querySelectorAll(".q").forEach(q=>{ const id=q.id.slice(2); q.classList.toggle("is-hard",S.hardest===id); q.classList.toggle("is-help",S.helpful===id); });
+  const h=S.hardest&&qById(S.hardest), p=S.helpful&&qById(S.helpful);
+  setPick("pick-hard",h); setPick("pick-help",p);
+  $("rem-hard").textContent=h?h.text:"Not chosen yet";
+  $("rem-help").textContent=p?p.text:"Not chosen yet";
+}
+function setPick(id,q){ const e=$(id); e.textContent=q?q.text:"Not chosen yet"; e.classList.toggle("empty",!q); }
+function renderP4(){
+  const d=G(); if(!d) return;
+  chip("g4-chip");
+  $("probe-label").textContent="Suggestion for Guideline "+d.id;
+  $("probe-text").textContent=d.probe;
+  renderMarks();
+}
+function renderFields(){
+  document.querySelectorAll("[data-bind]").forEach(e=>{ const k=e.dataset.bind; if(e.type==="checkbox") e.checked=!!S[k]; else e.value=S[k]||""; });
+}
+document.querySelectorAll("[data-bind]").forEach(e=>{
+  e.addEventListener(e.type==="checkbox"?"change":"input",()=>{ const k=e.dataset.bind; S[k]=e.type==="checkbox"?e.checked:e.value; });
+});
+function renderAll(){
+  renderNames();
+  $("gsel").value=S.g?String(S.g):"";
+  $("start").disabled=!S.g; $("start-hint").hidden=!!S.g;
+  renderFields(); renderP2(); renderP3(); renderP4();
+  go(S.g?page:1, true);
+}
+function go(n, quiet){
+  if (n>1 && !S.g) n=1;
+  page=n;
+  for (let i=1;i<=4;i++) $("p"+i).hidden=(i!==n);
+  document.querySelectorAll("#steps button").forEach(b=>{ const t=Number(b.dataset.go); b.disabled=(t>1&&!S.g); if(t===n) b.setAttribute("aria-current","step"); else b.removeAttribute("aria-current"); });
+  if (!quiet) window.scrollTo(0,0);
+}
+document.addEventListener("click",e=>{ const b=e.target.closest("[data-go]"); if(b && !b.disabled) go(Number(b.dataset.go)); });
+$("start").addEventListener("click",()=>go(2));
+
+/* ---------- files ---------- */
+const dlPromise = (window.claude && typeof window.claude.use==="function") ? window.claude.use("downloads").catch(()=>null) : Promise.resolve(null);
+function namePart(){
+  const ns=S.names.map(n=>n.trim()).filter(Boolean).map(n=>n.split(/\s+/).pop().replace(/[^\p{L}\p{N}-]/gu,"")).filter(Boolean);
+  return ns.length?ns.slice(0,4).join("-"):"team";
+}
+function baseName(){ return "AI-Lang-Guideline-"+(S.g||"none")+"_"+namePart(); }
+async function offer(filename,data){
+  const dl=await dlPromise;
+  if(!dl){
+    if(window.claude){ toast("Saving files is not available in this view. Use the paper version, or open the page in a regular browser."); return false; }
+    const blob=(data instanceof Blob)?data:new Blob([data],{type:filename.endsWith(".json")?"application/json":"application/octet-stream"});
+    const url=URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download=filename; document.body.append(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),15000); toast("Downloaded "+filename); return true;
+  }
+  try{ await dl.save({filename,data}); toast("Saved "+filename); return true; }
+  catch(err){
+    const c=err&&err.code;
+    if(c==="declined") toast("Download cancelled.");
+    else if(c==="rate_limited") toast("Another download is waiting for confirmation. Try again in a moment.");
+    else toast("The file could not be saved here. Try again, or use the paper version.");
+    return false;
+  }
+}
+function serialize(){ return JSON.stringify({app:APP_ID,version:1,savedAt:new Date().toISOString(),state:S},null,2); }
+function deserialize(text){
+  let o; try{ o=JSON.parse(text); }catch(e){ throw new Error("This file is not a progress file from this worksheet."); }
+  if(!o||o.app!==APP_ID||!o.state) throw new Error("This file is not a progress file from this worksheet.");
+  const st=Object.assign(blank(),o.state);
+  if(!Array.isArray(st.names)||!st.names.length) st.names=[""];
+  st.names=st.names.map(x=>String(x||""));
+  if(st.g!==null && !DATA.some(d=>d.id===Number(st.g))) st.g=null; else if(st.g!==null) st.g=Number(st.g);
+  if(typeof st.notes!=="object"||!st.notes) st.notes={};
+  for(const k of ["hardest","helpful"]) if(st[k] && !qById(st[k])) st[k]=null;
+  return st;
+}
+async function saveProgress(){ await offer(baseName()+".json", serialize()); }
+$("t-save").addEventListener("click",saveProgress);
+$("t-load").addEventListener("click",()=>$("file").click());
+$("file").addEventListener("change",e=>{
+  const f=e.target.files&&e.target.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=()=>{ try{ S=deserialize(String(r.result)); page=S.g?2:1; renderAll(); toast(S.g?"Progress loaded: Guideline "+S.g+".":"Progress loaded."); }catch(err){ toast(err.message); } e.target.value=""; };
+  r.onerror=()=>{ toast("The file could not be read. Try choosing it again."); e.target.value=""; };
+  r.readAsText(f);
+});
+
+/* ---------- Word export ---------- */
+function buildDocx(){
+  const D=window.docx; if(!D) throw new Error("nolib");
+  const {Document,Paragraph,TextRun,HeadingLevel,Table,TableRow,TableCell,WidthType,ShadingType,BorderStyle}=D;
+  const d=G(); const dash=v=>(v&&String(v).trim())?String(v).trim():"–";
+  const P=(runs,opts={})=>new Paragraph(Object.assign({children:Array.isArray(runs)?runs:[new TextRun(String(runs))],spacing:{after:120}},opts));
+  const L=(label,val)=>P([new TextRun({text:label+" ",bold:true}),new TextRun(dash(val))]);
+  const H=(t,l)=>new Paragraph({text:t,heading:l,spacing:{before:240,after:120}});
+  const names=S.names.map(n=>n.trim()).filter(Boolean);
+  const kids=[
+    new Paragraph({text:"Exploring the AI Lang Guidelines – Team worksheet",heading:HeadingLevel.TITLE,spacing:{after:120}}),
+    P([new TextRun({text:"AI in ELT · Friday, 23 October 2026",color:"555555"})]),
+    L("Our team:",names.join(", ")),
+    L("Guideline:",d?("Guideline "+d.id+": "+d.title):""),
+    L("Principle:",d?(d.principle.num+". AI-assisted language education should be "+d.principle.name):""),
+    H("1. Orient",HeadingLevel.HEADING_1),
+    L("What the guideline asks of teachers:",S.summary),
+    H("2. Engage",HeadingLevel.HEADING_1),
+    L("Teaching situation:",S.situation),
+  ];
+  const cellB={top:{style:BorderStyle.SINGLE,size:4,color:"BBBBBB"},bottom:{style:BorderStyle.SINGLE,size:4,color:"BBBBBB"},left:{style:BorderStyle.SINGLE,size:4,color:"BBBBBB"},right:{style:BorderStyle.SINGLE,size:4,color:"BBBBBB"}};
+  const cell=(children,shade)=>new TableCell({children,borders:cellB,margins:{top:80,bottom:80,left:100,right:100},shading:shade?{type:ShadingType.CLEAR,color:"auto",fill:"E8ECF3"}:undefined});
+  let worked=0;
+  if(d) d.comps.forEach(c=>{
+    const ids=c.questions.map((q,i)=>qid(c,i));
+    const touched=ids.some(id=>(S.notes[id]||"").trim()||S.hardest===id||S.helpful===id);
+    if(!touched) return; worked++;
+    kids.push(H(c.n+". "+c.can,HeadingLevel.HEADING_2));
+    kids.push(P([new TextRun({text:c.desc,italics:true})]));
+    const rows=[new TableRow({tableHeader:true,children:[cell([P([new TextRun({text:"Reflection question",bold:true})],{spacing:{after:0}})],true),cell([P([new TextRun({text:"Our notes",bold:true})],{spacing:{after:0}})],true)]})];
+    c.questions.forEach((q,i)=>{
+      const id=ids[i]; const runs=[new TextRun(q)];
+      if(S.hardest===id) runs.push(new TextRun({text:"  [Hardest]",bold:true,color:"A9512A"}));
+      if(S.helpful===id) runs.push(new TextRun({text:"  [Most helpful]",bold:true,color:"2C7350"}));
+      rows.push(new TableRow({children:[cell([P(runs,{spacing:{after:0}})]),cell([P(dash(S.notes[id]),{spacing:{after:0}})])]}));
+    });
+    kids.push(new Table({rows,width:{size:100,type:WidthType.PERCENTAGE},columnWidths:[4600,4400]}));
+  });
+  if(!worked) kids.push(P("No competences worked on."));
+  const h=S.hardest&&qById(S.hardest), p=S.helpful&&qById(S.helpful);
+  kids.push(H("Our choices",HeadingLevel.HEADING_2),
+    L("Hardest question:",h?h.text:""), L("Why it was hard:",S.hardWhy),
+    L("Most helpful question:",p?p.text:""), L("Why it was helpful:",S.helpWhy),
+    H("3. Try",HeadingLevel.HEADING_1));
+  if(d) kids.push(L("Suggestion:",d.probe));
+  if(S.skipped) kids.push(P("Step skipped."));
+  else kids.push(L("Chatbot we used:",S.tool),L("What we asked:",S.prompt),L("What we noticed:",S.notice));
+  kids.push(H("4. Prepare",HeadingLevel.HEADING_1),
+    L("Something we found hard:",S.prepHard), L("Something we found helpful:",S.prepHelp), L("A question we still have:",S.prepQ),
+    new Paragraph({spacing:{before:360},children:[new TextRun({text:"Source: Kostoulas et al. (2026). ",size:18,color:"666666"}),new TextRun({text:"Guidelines for the use of artificial intelligence in language education.",italics:true,size:18,color:"666666"}),new TextRun({text:" European Centre for Modern Languages. CC BY-SA.",size:18,color:"666666"})]}));
+  return new Document({creator:names.join(", ")||"AI in ELT",title:"Exploring the AI Lang Guidelines",styles:{default:{document:{run:{font:"Calibri",size:22}}}},sections:[{properties:{page:{margin:{top:1134,bottom:1134,left:1134,right:1134}}},children:kids}]});
+}
+async function wordBlob(){ return window.docx.Packer.toBlob(buildDocx()); }
+async function downloadWord(){
+  if(!S.g){ toast("Choose a guideline first."); go(1); return; }
+  if(!window.docx){ toast("The Word export could not load. Check your connection and reload, or use Save progress."); return; }
+  try{ const blob=await wordBlob(); await offer(baseName()+".docx",blob); }
+  catch(err){ toast("The Word document could not be created. Use Save progress instead."); }
+}
+$("t-word").addEventListener("click",downloadWord);
+document.addEventListener("click",e=>{ const b=e.target.closest("[data-act]"); if(!b) return; if(b.dataset.act==="word") downloadWord(); else saveProgress(); });
+
+/* ---------- boot ---------- */
+buildSelect();
+function start(data){
+  if(data && data.S){ try{ S=Object.assign(blank(),data.S); page=data.page||1; }catch(e){} }
+  renderAll();
+}
+window.claude?.hot?.snapshot?.(()=>({S,page}));
+window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});
+window.__app={get S(){return S},set S(v){S=v},renderAll,go,serialize,deserialize,wordBlob,buildDocx};
+</script>
+
+</body>
+</html>
